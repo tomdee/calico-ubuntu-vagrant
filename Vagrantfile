@@ -27,13 +27,13 @@ Vagrant.configure(2) do |config|
       # The docker provisioner installs docker.
       host.vm.provision :docker, images: [
           "busybox:latest",
-          "calico/node:v0.5.2",
+          "calico/node:v0.5.3",
           "quay.io/coreos/etcd:v2.0.11",
       ]
 
       # Replace docker with known good version.
       host.vm.provision :shell, inline: "sudo stop docker"
-      host.vm.provision :shell, inline: "sudo wget -qO /usr/bin/docker https://github.com/Metaswitch/calico-docker/releases/download/v0.5.2/docker"
+      host.vm.provision :shell, inline: "sudo wget -qO /usr/bin/docker https://github.com/Metaswitch/calico-docker/releases/download/v0.5.3/docker"
 
       # Docker uses Consul for clustering. Install just on the first host.
       if i == 0
@@ -54,7 +54,7 @@ Vagrant.configure(2) do |config|
       host.vm.provision :shell, inline: "sudo start docker"
 
       # download calicoctl.
-      host.vm.provision :shell, inline: "sudo wget -qO /usr/local/bin/calicoctl https://github.com/Metaswitch/calico-docker/releases/download/v0.5.2/calicoctl"
+      host.vm.provision :shell, inline: "sudo wget -qO /usr/local/bin/calicoctl https://github.com/Metaswitch/calico-docker/releases/download/v0.5.3/calicoctl"
       host.vm.provision :shell, inline: "chmod +x /usr/local/bin/calicoctl"
 
       # Ensure that the iptables kernel modules are loaded etc...

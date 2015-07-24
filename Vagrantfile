@@ -1,21 +1,32 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$num_instances = 2
-$instance_name_prefix = "calico"
+# The version of calico to install
+calico_docker_ver = "v0.5.3"
+
+# Size of the cluster created by Vagrant
+num_instances=2
+
+# Change basename of the VM
+instance_name_prefix="calico"
+
+# The IP address of the first server
+primary_ip = "172.17.8.101"
 
 Vagrant.configure(2) do |config|
+  # always use Vagrants insecure key
+  config.ssh.insert_key = false
+
+  # Use an official Ubuntu base box
   config.vm.box = "ubuntu/trusty64"
 
   # Set up each box
-  $num_instances.times do |i|
-
-    vm_name = [$instance_name_prefix, (i+1)].join("-")
+  (1..num_instances).each do |i|
+    vm_name = "%s-%02d" % [instance_name_prefix, i]
     config.vm.define vm_name do |host|
       host.vm.hostname = vm_name
 
-      ip = "172.17.8.#{i+101}"
-      primary_ip = "172.17.8.101"
+      ip = "172.17.8.#{i+100}"
       host.vm.network :private_network, ip: ip
 
       # Fix stdin: is not a tty error (http://foo-o-rama.com/vagrant--stdin-is-not-a-tty--fix.html)
@@ -27,16 +38,16 @@ Vagrant.configure(2) do |config|
       # The docker provisioner installs docker.
       host.vm.provision :docker, images: [
           "busybox:latest",
-          "calico/node:v0.5.3",
+          "calico/node:#{calico_docker_ver}",
           "quay.io/coreos/etcd:v2.0.11",
       ]
 
       # Replace docker with known good version.
-      host.vm.provision :shell, inline: "sudo stop docker"
-      host.vm.provision :shell, inline: "sudo wget -qO /usr/bin/docker https://github.com/Metaswitch/calico-docker/releases/download/v0.5.3/docker"
+      host.vm.provision :shell, inline: "stop docker", :privileged => true
+      host.vm.provision :shell, inline: "wget -qO /usr/bin/docker https://github.com/Metaswitch/calico-docker/releases/download/#{calico_docker_ver}/docker", :privileged => true
 
       # Docker uses Consul for clustering. Install just on the first host.
-      if i == 0
+      if i == 1
         # Download consul and start.
         host.vm.provision :shell, inline: <<-SHELL
           sudo apt-get install -y unzip
@@ -54,14 +65,15 @@ Vagrant.configure(2) do |config|
       host.vm.provision :shell, inline: "sudo start docker"
 
       # download calicoctl.
-      host.vm.provision :shell, inline: "sudo wget -qO /usr/local/bin/calicoctl https://github.com/Metaswitch/calico-docker/releases/download/v0.5.3/calicoctl"
+      host.vm.provision :shell, inline: "wget -qO /usr/local/bin/calicoctl https://github.com/Metaswitch/calico-docker/releases/download/#{calico_docker_ver}/calicoctl", :privileged => true
+
       host.vm.provision :shell, inline: "chmod +x /usr/local/bin/calicoctl"
 
       # Ensure that the iptables kernel modules are loaded etc...
       host.vm.provision :shell, inline: "sudo calicoctl checksystem --fix"
 
       # Calico uses etcd for clustering. Install it on the first host only.
-      if i == 0
+      if i == 1
         host.vm.provision :docker do |d|
           d.run "quay.io/coreos/etcd",
             args: "--net=host",

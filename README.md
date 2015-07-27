@@ -1,14 +1,14 @@
 # Calico Docker Ubuntu Vagrant example
 
-This example shows how to network Docker containers using Calico with Docker's [libnetwork network driver support](https://github.com/docker/libnetwork) that was introduced on the Docker [experimental channel](https://github.com/docker/docker/tree/master/experimental) alongside the Docker 1.7 release.
+This example shows how to network Docker containers using Calico with Docker.
 
 ### A note about names & addresses
 In this example, we will use the following server names and IP addresses.
 
-| hostname  | IP address   |
-|-----------|--------------|
-| calico-1  | 172.17.8.101 |
-| calico-2  | 172.17.8.102 |
+| hostname   | IP address   |
+|------------|--------------|
+| calico-01  | 172.17.8.101 |
+| calico-02  | 172.17.8.102 |
 
 ## Set up your cluster
 
@@ -20,7 +20,7 @@ In this example, we will use the following server names and IP addresses.
 
 2) Clone this project and get it running.
 
-    git clone https://github.com/Metaswitch/calico-ubuntu-vagrant.git
+    git clone https://github.com/Metaswitch/calico-ubuntu-vagrant.git -b general
     cd calico-ubuntu-vagrant
 
 3) Startup and SSH
@@ -42,11 +42,11 @@ You should now have two Ubuntu servers, with Consul and Etcd running on the firs
 
 At this point, it's worth checking that your servers can ping each other.
 
-From calico-1
+From calico-01
 
     ping 172.17.8.102
 
-From calico-2
+From calico-02
 
     ping 172.17.8.101
 

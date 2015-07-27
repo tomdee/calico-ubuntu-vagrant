@@ -42,28 +42,6 @@ Vagrant.configure(2) do |config|
           "quay.io/coreos/etcd:v2.0.11",
       ]
 
-      # Replace docker with known good version.
-      host.vm.provision :shell, inline: "stop docker", :privileged => true
-      host.vm.provision :shell, inline: "wget -qO /usr/bin/docker https://github.com/Metaswitch/calico-docker/releases/download/#{calico_docker_ver}/docker", :privileged => true
-
-      # Docker uses Consul for clustering. Install just on the first host.
-      if i == 1
-        # Download consul and start.
-        host.vm.provision :shell, inline: <<-SHELL
-          sudo apt-get install -y unzip
-          curl -L --silent https://dl.bintray.com/mitchellh/consul/0.5.2_linux_amd64.zip -o consul.zip
-          unzip consul.zip
-          chmod +x consul
-          nohup ./consul agent -server -bootstrap-expect 1 -data-dir /tmp/consul -client #{primary_ip} > consul.log &
-        SHELL
-      end
-
-      # Set Docker to use consul for multihost.
-      host.vm.provision :shell, inline: %Q|sudo sh -c 'echo "DOCKER_OPTS=\"--kv-store=consul:#{primary_ip}:8500\"" > /etc/default/docker'|
-
-      # Restart docker.
-      host.vm.provision :shell, inline: "sudo start docker"
-
       # download calicoctl.
       host.vm.provision :shell, inline: "wget -qO /usr/local/bin/calicoctl https://github.com/Metaswitch/calico-docker/releases/download/#{calico_docker_ver}/calicoctl", :privileged => true
 

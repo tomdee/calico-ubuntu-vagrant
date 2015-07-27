@@ -5,10 +5,10 @@ This example shows how to network Docker containers using Calico with Docker's [
 ### A note about names & addresses
 In this example, we will use the following server names and IP addresses.
 
-| hostname  | IP address   |
-|-----------|--------------|
-| calico-1  | 172.17.8.101 |
-| calico-2  | 172.17.8.102 |
+| hostname   | IP address   |
+|------------|--------------|
+| calico-01  | 172.17.8.101 |
+| calico-02  | 172.17.8.102 |
 
 ## Set up your cluster
 
